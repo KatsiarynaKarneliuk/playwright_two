@@ -1,7 +1,7 @@
 import { Page, Locator } from '@playwright/test';
 import { randomData } from '../../services/generator';
 
-//part of creatProduct.page (in this case only one but efective when there is several sections for 1 page)
+//part of creatProduct.page (in this case only one, efective when there is several sections for 1 page)
 export default class ProductActions{
     readonly page:Page;
     readonly productName: Locator;

@@ -63,8 +63,7 @@ export default defineConfig({
       name: 'ordinary',
       use: { ...devices['Desktop Chrome'] },
       testIgnore: ['**/loggedin.spec.ts'],
-      //testMatch: '**/use_csv_data.spec.ts',
-      testMatch:'**/tests/test-4.spec.ts'
+      testMatch:'**/tests/not_auth_tests/**',
     },
 
     {

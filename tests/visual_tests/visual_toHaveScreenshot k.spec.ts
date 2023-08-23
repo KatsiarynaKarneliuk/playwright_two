@@ -9,7 +9,7 @@ test('Create baseScreenshots for several pages @baseScreenshot', async({ page },
         'https://playwright.dev/docs/intro'
     ]
     for (let url of urls) {
-        const path = `screenshotsBase/base${urlToFilename(url)}.png`
+        const path = `screenshots_base/base${urlToFilename(url)}.png`
         await page.goto(url);
         if(url==='https://playwright.dev/'){
             await page.screenshot({
