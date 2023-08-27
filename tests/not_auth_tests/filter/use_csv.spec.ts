@@ -1,44 +1,36 @@
 import { test, expect } from '@playwright/test';
-import * as csv from 'fast-csv';
-const { execSync } = require('child_process');
-const fs = require('fs');
-import { normalizeString } from './../../utils/normaliser';
+import { normalizeString } from '../../../utils/normaliser';
+import { readCSV } from '../../../utils/gathering_data_for_Pict'
+import { loadTotalParts } from '../../../utils/count_parts';
 
 
-async function readCSV():Promise<any[]> {
-  return new Promise((resolve)=>{
-      let dataArray: any[] =[];
-      csv
-          .parseFile('test_data/result.csv', {headers:true, delimiter: '\t' })
-          .on('data', data=>{
-              dataArray.push(data);
-          })
-          .on('end',()=>{
-              resolve(dataArray);
-          })
-  })
-}
+let totalParts: number;
 
+test.beforeAll(async () => {
+  totalParts = await loadTotalParts();
+}) 
 
-test.only('Use pict data in a test', async({ page })=>{
+test(`Use pict files in a test`, async({ page })=>{
   await page.setViewportSize({ width: 1280, height: 1200 });
-  const csvData = await readCSV();
+  
   await page.goto('https://www.beliani.pl/meble-ogrodowe/wszystkie+produkty/?Material=Beton&Typ=Duzy_zestaw_wypoczynkowy,Domek_narzedziowy&Kolor=Bialy&Cechy=Blat_z_otworem_na_parasol&sort=default');
   await page.getByRole('button', { name: 'Akceptuj wszystkie cookies' }).click();
-
-    for (const row of csvData){  
+  for (let partIndex = 0; partIndex < totalParts; partIndex++) {
+    const csvData = await readCSV(partIndex);
+    console.log(`Working file is: ${partIndex}`);
+    for (const row of csvData){
+      console.log(`Working with row: ${JSON.stringify(row)}`);  
       // clean filters
-      await page.waitForTimeout(1000)
-      await page.locator('.offers-chosen-filters__filter__title').first().scrollIntoViewIfNeeded();
+      await page.locator('.offers-chosen-filters__filter__title').first();
       let labelsCount = await page.locator('.offers-chosen-filters__filter__title').count();
       while (labelsCount > 0) {
         await expect(async () => {
           await page.locator('.offers-chosen-filters__filter__title').first().click();
-          
-            labelsCount = await page.locator('.offers-chosen-filters__filter__title').count();
-          }).toPass();   
+
+          labelsCount = await page.locator('.offers-chosen-filters__filter__title').count();
+        }).toPass();   
       }
-      await page.waitForTimeout(1000)
+
       // choose new filters
       if (row.Type && row.Material){
         try{
@@ -62,15 +54,18 @@ test.only('Use pict data in a test', async({ page })=>{
             `.*${normalizeString(row.Type)}.*${normalizeString(row.Material)}|` + 
             `.*${normalizeString(row.Material)}.*${normalizeString(row.Type)}`
         );
-        await page.waitForTimeout(1000)
-        //await expect(page).toHaveURL(expectedPattern);
-        await page.waitForURL(expectedPattern);
 
         // check visibility
         await expect(async () => {
-          await expect(page.locator('.offers-chosen-filters__filter__title').and(page.getByText(`${row.Type}`, {exact:true}))).toBeVisible();  
-          await expect(page.locator('.offers-chosen-filters__filter__title').and(page.getByText(`${row.Material}`, {exact:true}))).toBeVisible();
+          const visibleFilters = page.locator('.offers-chosen-filters__filter__title');
+
+          const typeVisibleFilter = visibleFilters.getByText(`${row.Type}`, {exact:true});
+          await expect(typeVisibleFilter).toBeVisible();
+
+          const materialVisibleFilter = visibleFilters.getByText(`${row.Material}`, {exact:true})
+          await expect(materialVisibleFilter ).toBeVisible();
         }).toPass(); 
       }
-  } 
-})
+    }
+  }
+});

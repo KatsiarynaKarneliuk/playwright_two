@@ -1,6 +1,11 @@
-const { execSync } = require('child_process');
+import { execSync } from 'child_process';
 
-function generatePictModel(inputFile: string, outputFile:string){
-    execSync(`pict ${inputFile} > ${outputFile}`);
-}
-generatePictModel('test_data/furniture_model.csv', 'test_data/result.csv');
+export async function executePictOnFiles() {
+        try{
+            execSync('pict test_data/filters/original.csv > test_data/filters/handled.csv');
+        }
+        catch(error){
+            console.log('Error executing pict file')
+        }       
+    }
+

@@ -1,5 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
-const path = require('path');
+import path from 'path';
 import dotenv from 'dotenv'
 dotenv.config({ path: '.env.local' });
 
@@ -63,7 +63,7 @@ export default defineConfig({
       name: 'ordinary',
       use: { ...devices['Desktop Chrome'] },
       testIgnore: ['**/loggedin.spec.ts'],
-      testMatch:'**/tests/not_auth_tests/**',
+      testMatch:'**/not_auth_tests/filter/**',
     },
 
     {

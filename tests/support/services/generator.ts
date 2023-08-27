@@ -1,5 +1,5 @@
-//import * as faker from '../../../node_modules/faker';
-const faker = require('faker');
+import * as faker from '../../../node_modules/faker';
+
 
 (faker as any).locale = 'en';
 export const randomData = {
